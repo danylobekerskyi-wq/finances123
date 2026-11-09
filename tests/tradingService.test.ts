@@ -65,7 +65,7 @@ describe("TradingService scan reference", () => {
       getSnapshot: vi.fn(async () => snapshot()),
     } as unknown as KrakenClient;
     const service = new TradingService(
-      loadConfig({}),
+      loadConfig({ SELF_IMPROVEMENT_ENABLED: "false" }),
       kraken,
       { getPortfolio: async () => ({ state: { closedTrades: [] } }) } as unknown as PaperBroker,
       referencePrices,
@@ -189,7 +189,7 @@ describe("TradingService scan reference", () => {
     const kraken = {
       getTicker: vi.fn(async () => ({ bid: 101 })),
     } as unknown as KrakenClient;
-    const service = new TradingService(loadConfig({}), kraken, broker);
+    const service = new TradingService(loadConfig({ SELF_IMPROVEMENT_ENABLED: "false" }), kraken, broker);
 
     await expect(service.getPaperReportSnapshot()).resolves.toMatchObject({
       portfolio: { state: { position: { id: "open-1" } } },

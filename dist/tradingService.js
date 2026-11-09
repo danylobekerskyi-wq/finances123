@@ -1,3 +1,5 @@
+import path from "node:path";
+import { SelfImprovement, adjustedHolding } from "./selfImprovement.js";
 import { learnedRiskMultiplier } from "./fibonacci.js";
 import { randomUUID } from "node:crypto";
 import { calculateLongPlan } from "./risk.js";
@@ -8,6 +10,7 @@ export class TradingService {
     broker;
     referencePrices;
     clock;
+    learner;
     signals = new Map();
     constructor(config, kraken, broker, referencePrices, clock = Date.now) {
         this.config = config;
@@ -69,6 +72,14 @@ export class TradingService {
         const memory = await this.broker.getPortfolio(null);
         const riskMultiplier = learnedRiskMultiplier(memory.state.closedTrades.map(t => t.resultR));
         const result = evaluateSnapshot(snapshot, { ...this.strategyOptions(effectiveInput), riskPct: this.config.riskPerTradePct * riskMultiplier });
+        if (this.config.tradingMode === "paper" && this.config.selfImprovementEnabled) {
+            this.learner ??= new SelfImprovement(path.join(this.config.dataDir, "learning-state.json"));
+            const factor = await this.learner.observe(snapshot, result.plan, this.config.takerFeePct, this.config.slippagePct);
+            if (result.plan?.maxHoldingMinutes) {
+                result.plan.maxHoldingMinutes = adjustedHolding(result.plan.maxHoldingMinutes, factor);
+                result.reasons.push(`Validated holding-time factor: ${factor}`);
+            }
+        }
         if (result.decision !== "BUY_SETUP_CONFIRMED") {
             return { signalId: null, result, reference: fetchedReference };
         }

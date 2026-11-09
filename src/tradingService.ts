@@ -1,3 +1,5 @@
+import path from "node:path";
+import { SelfImprovement, adjustedHolding } from "./selfImprovement.js";
 import { learnedRiskMultiplier } from "./fibonacci.js";
 import { randomUUID } from "node:crypto";
 import type { AppConfig } from "./config.js";
@@ -36,6 +38,7 @@ export interface ScanResponse {
 }
 
 export class TradingService {
+  private learner?: SelfImprovement;
   private readonly signals = new Map<string, StoredSignal>();
 
   constructor(
@@ -106,6 +109,14 @@ export class TradingService {
       snapshot,
       { ...this.strategyOptions(effectiveInput), riskPct: this.config.riskPerTradePct * riskMultiplier },
     );
+    if (this.config.tradingMode === "paper" && this.config.selfImprovementEnabled) {
+      this.learner ??= new SelfImprovement(path.join(this.config.dataDir, "learning-state.json"));
+      const factor = await this.learner.observe(snapshot, result.plan, this.config.takerFeePct, this.config.slippagePct);
+      if (result.plan?.maxHoldingMinutes) {
+        result.plan.maxHoldingMinutes = adjustedHolding(result.plan.maxHoldingMinutes, factor);
+        result.reasons.push(`Validated holding-time factor: ${factor}`);
+      }
+    }
     if (result.decision !== "BUY_SETUP_CONFIRMED") {
       return { signalId: null, result, reference: fetchedReference };
     }

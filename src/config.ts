@@ -6,6 +6,7 @@ import {
 } from "./types.js";
 
 export interface AppConfig {
+  selfImprovementEnabled: boolean;
   tradingMode: "paper" | "live";
   host: string;
   port: number;
@@ -277,6 +278,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
 
   return {
     tradingMode,
+    selfImprovementEnabled: booleanFromEnv(env.SELF_IMPROVEMENT_ENABLED, true),
     host: env.HOST || "127.0.0.1",
     port: numberFromEnv(env, "PORT", 3000, 1),
     krakenBaseUrl: env.KRAKEN_BASE_URL || "https://api.kraken.com",

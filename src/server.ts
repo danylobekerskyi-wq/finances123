@@ -64,6 +64,7 @@ export function createApp(
       mode: config.tradingMode,
       liveOrderSubmission: config.enableLiveOrderSubmission,
       autoPaperTrading: config.autoPaperTradingEnabled,
+      selfImprovementEnabled: config.tradingMode === "paper" && config.selfImprovementEnabled,
       shadowLogging: config.shadowLoggingEnabled,
       shadowRuntimeReady: Boolean(
         shadowStatus && config.shadowWhenDailyBlocked,
