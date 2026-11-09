@@ -74,6 +74,7 @@ export type SetupName =
   | "NONE";
 
 export interface TradePlan {
+  maxHoldingMinutes?: number;
   entry: number;
   stop: number;
   minimumTarget: number;
@@ -117,6 +118,8 @@ export interface ScanResult {
 }
 
 export interface PaperPosition {
+  maxHoldingMinutes?: number;
+  exitDeadline?: string;
   id: string;
   pair: SupportedPair;
   units: number;
@@ -133,7 +136,7 @@ export interface ClosedPaperTrade extends PaperPosition {
   exitPriceCad: number;
   exitFeeCad: number;
   closedAt: string;
-  reason: "STOP" | "TARGET" | "MANUAL";
+  reason: "STOP" | "TARGET" | "MANUAL" | "TIME_EXIT";
   realizedPnlCad: number;
   resultR: number;
 }

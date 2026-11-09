@@ -1,3 +1,4 @@
+import { chooseHoldingMinutes } from "./holdingTime.js";
 import { fibonacciSignal } from "./fibonacci.js";
 import { atr, classifyRegime } from "./indicators.js";
 import { calculateLongPlan } from "./risk.js";
@@ -345,6 +346,7 @@ export function evaluateSnapshot(
     );
   }
 
+  plan.maxHoldingMinutes = chooseHoldingMinutes(plan.entry, plan.minimumTarget, atr(snapshot.candles1m, 14));
   const expiresAt = new Date(Date.parse(snapshot.capturedAt) + (options.strategy === "fibonacci" ? 60 : 600) * 1000);
   return {
     decision: "BUY_SETUP_CONFIRMED",

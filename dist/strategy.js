@@ -1,3 +1,4 @@
+import { chooseHoldingMinutes } from "./holdingTime.js";
 import { fibonacciSignal } from "./fibonacci.js";
 import { atr, classifyRegime } from "./indicators.js";
 import { calculateLongPlan } from "./risk.js";
@@ -173,6 +174,7 @@ export function evaluateSnapshot(snapshot, options) {
                 : "A current news and macro-event check is required",
         ], "Re-scan after confirming no material event risk within the next 15 minutes", referenceDifference, newsStatus, setup.name, trigger, setup.timeframe);
     }
+    plan.maxHoldingMinutes = chooseHoldingMinutes(plan.entry, plan.minimumTarget, atr(snapshot.candles1m, 14));
     const expiresAt = new Date(Date.parse(snapshot.capturedAt) + (options.strategy === "fibonacci" ? 60 : 600) * 1000);
     return {
         decision: "BUY_SETUP_CONFIRMED",

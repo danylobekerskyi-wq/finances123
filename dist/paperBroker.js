@@ -170,7 +170,15 @@ export class PaperBroker {
             if (cashRequired > state.cashCad + 0.005) {
                 throw new Error("Paper account has insufficient USD cash for this position");
             }
+            if (plan.maxHoldingMinutes !== undefined &&
+                (!Number.isInteger(plan.maxHoldingMinutes) || plan.maxHoldingMinutes < 3 || plan.maxHoldingMinutes > 30)) {
+                throw new Error("Holding time must be an integer between 3 and 30 minutes");
+            }
             const position = {
+                ...(plan.maxHoldingMinutes === undefined ? {} : {
+                    maxHoldingMinutes: plan.maxHoldingMinutes,
+                    exitDeadline: new Date(Date.parse(now) + plan.maxHoldingMinutes * 60000).toISOString(),
+                }),
                 id: randomUUID(),
                 pair,
                 units: plan.units,
@@ -239,6 +247,9 @@ export class PaperBroker {
             else if (executableBidCad >= position.targetCad) {
                 reason = "TARGET";
                 referencePrice = position.targetCad;
+            }
+            else if (position.exitDeadline && this.clock() >= Date.parse(position.exitDeadline)) {
+                reason = "TIME_EXIT";
             }
             if (!reason)
                 return null;

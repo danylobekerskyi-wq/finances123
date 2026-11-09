@@ -129,6 +129,7 @@ export class TradingService {
             maxExposurePct: this.config.maxExposurePct,
             rewardRisk: this.config.rewardRisk,
         });
+        plan.maxHoldingMinutes = signal.result.plan.maxHoldingMinutes;
         if (plan.positionNotionalCad < 10 || plan.targetDistancePct > 4) {
             this.signals.delete(signalId);
             throw new Error("Repriced simulated trade no longer satisfies minimum size and cost rules");

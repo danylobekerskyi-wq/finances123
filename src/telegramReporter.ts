@@ -37,6 +37,7 @@ function price(value: number): string {
 function reasonLabel(reason: string): string {
   if (reason === "TARGET") return "ціль";
   if (reason === "STOP") return "стоп";
+  if (reason === "TIME_EXIT") return "вичерпано час утримання";
   return reason.toLowerCase();
 }
 
@@ -277,6 +278,7 @@ export class TelegramTradingReporter {
               `Вхід: ${price(position.entryPriceCad)}`,
               `Стоп: ${price(position.stopCad)}`,
               `Ціль: ${price(position.targetCad)}`,
+              ...(position.maxHoldingMinutes ? [`Ліміт часу: ${position.maxHoldingMinutes} хв; вихід до ${position.exitDeadline}`] : []),
               `Плановий ризик: ${position.plannedRiskCad.toFixed(2)} USD`,
             ]
           : []),
